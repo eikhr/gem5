@@ -272,6 +272,11 @@ class TimingSimpleCPU : public BaseSimpleCPU
     Port &getInstPort() override { return icachePort; }
 
   public:
+    struct SyscallCPUStats : public statistics::Group
+    {
+        SyscallCPUStats(statistics::Group *parent);
+        statistics::Scalar numSyscalls;
+    } syscallStats;
 
     DrainState drain() override;
     void drainResume() override;
