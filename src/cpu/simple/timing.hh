@@ -272,6 +272,9 @@ class TimingSimpleCPU : public BaseSimpleCPU
     Port &getInstPort() override { return icachePort; }
 
   public:
+    virtual void regStats() override;
+
+    statistics::Scalar numSyscalls;
 
     DrainState drain() override;
     void drainResume() override;

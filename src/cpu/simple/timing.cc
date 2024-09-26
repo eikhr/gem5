@@ -67,6 +67,17 @@ TimingSimpleCPU::init()
 }
 
 void
+TimingSimpleCPU::regStats()
+{
+    BaseSimpleCPU::regStats();
+
+    numSyscalls
+        .name(name() + ".numSyscalls")
+        .desc("Number of syscalls")
+        ;
+}
+
+void
 TimingSimpleCPU::TimingCPUPort::TickEvent::schedule(PacketPtr _pkt, Tick t)
 {
     pkt = _pkt;
@@ -839,6 +850,12 @@ TimingSimpleCPU::completeIfetch(PacketPtr pkt)
 
 
     preExecute();
+
+    if (curStaticInst->isSyscall()) {
+        // Log syscall instruction
+        DPRINTF(SimpleCPU, "Syscall instruction encountered\n");
+        numSyscalls++;
+    }
 
     // hardware transactional memory
     if (curStaticInst && curStaticInst->isHtmStart()) {
