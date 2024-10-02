@@ -849,7 +849,7 @@ TimingSimpleCPU::completeIfetch(PacketPtr pkt)
 
     preExecute();
 
-    if (curStaticInst->isSyscall()) {
+    if (curStaticInst && curStaticInst->isSyscall()) {
         // Log syscall instruction
         DPRINTF(SimpleCPU, "Syscall instruction encountered\n");
         syscallStats.numSyscalls++;
