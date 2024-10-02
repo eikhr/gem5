@@ -66,15 +66,12 @@ TimingSimpleCPU::init()
     BaseSimpleCPU::init();
 }
 
-void
-TimingSimpleCPU::regStats()
+TimingSimpleCPU::
+SyscallCPUStats::SyscallCPUStats(statistics::Group *parent)
+    : statistics::Group(parent),
+      ADD_STAT(numSyscalls, statistics::units::Count::get(),
+               "Number of syscalls")
 {
-    BaseSimpleCPU::regStats();
-
-    numSyscalls
-        .name(name() + ".numSyscalls")
-        .desc("Number of syscalls")
-        ;
 }
 
 void
@@ -87,7 +84,8 @@ TimingSimpleCPU::TimingCPUPort::TickEvent::schedule(PacketPtr _pkt, Tick t)
 TimingSimpleCPU::TimingSimpleCPU(const BaseTimingSimpleCPUParams &p)
     : BaseSimpleCPU(p), fetchTranslation(this), icachePort(this),
       dcachePort(this), ifetch_pkt(NULL), dcache_pkt(NULL), previousCycle(0),
-      fetchEvent([this]{ fetch(); }, name())
+      fetchEvent([this]{ fetch(); }, name()),
+      syscallStats(this)
 {
     _status = Idle;
 }
@@ -854,7 +852,7 @@ TimingSimpleCPU::completeIfetch(PacketPtr pkt)
     if (curStaticInst->isSyscall()) {
         // Log syscall instruction
         DPRINTF(SimpleCPU, "Syscall instruction encountered\n");
-        numSyscalls++;
+        syscallStats.numSyscalls++;
     }
 
     // hardware transactional memory
