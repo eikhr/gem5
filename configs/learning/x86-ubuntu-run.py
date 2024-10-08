@@ -69,21 +69,7 @@ board = X86Board(
 command = (
     "m5 exit;"
     + "echo 'This is running on Timing CPU cores.';"
-    + "sleep 1;"
-    + "m5 exit;"
     + "ls;"
-    + "sleep 1;"
-    + "m5 exit;"
-    + "pwd;"
-    + "sleep 1;"
-    + "m5 exit;"
-    + "ls /;"
-    + "sleep 1;"
-    + "m5 exit;"
-    + "cd /;"
-    + "sleep 1;"
-    + "m5 exit;"
-    + "pwd;"
     + "sleep 1;"
     + "m5 exit;"
 )
@@ -107,10 +93,9 @@ def handle_exit():
     print("Resetting stats at the start of ROI!")
     m5.stats.reset()
     processor.switch()
-    for i in range(5):
-        yield False  # E.g., continue the simulation.
-        print("Dump stats at the end of the ROI!")
-        m5.stats.dump()
+    yield False  # E.g., continue the simulation.
+    print("Dump stats at the end of the ROI!")
+    m5.stats.dump()
     yield True  # Stop the simulation. We're done.
 
 
