@@ -219,6 +219,9 @@ let {{
                         flags.append("IsSerializing")
                         flags.append("IsSerializeBefore")
 
+                    if self.getMnemonic() == "syscall": # or self.getMnemonic() == "int": #and op.imm == 0x80:
+                        flags.append("IsSyscall")
+
                 if micropc == numMicroops - 1:
                     flags.append("IsLastMicroop")
 

@@ -43,6 +43,15 @@ namespace X86ISA
 
 X86ISAInst::MicrocodeRom Decoder::microcodeRom;
 
+Decoder::DecoderSyscallStats::DecoderSyscallStats(statistics::Group *parent) : statistics::Group(parent),
+    ADD_STAT(numSyscallsDecoded, statistics::units::Count::get(), "Number of syscalls decoded"),
+{
+}
+
+void Decoder::logSyscall() {
+    stats.numSyscallsDecoded++;
+}
+
 Decoder::State
 Decoder::doResetState()
 {
@@ -686,6 +695,8 @@ Decoder::decode(ExtMachInst mach_inst, Addr addr)
         si = decodeInst(mach_inst);
         (*instMap)[mach_inst] = si;
     }
+
+    si->setImm(mach_inst.immediate);
 
     si->size(basePC + offset - origPC);
 

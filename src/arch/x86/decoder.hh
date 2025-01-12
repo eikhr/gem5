@@ -352,6 +352,14 @@ class Decoder : public InstDecoder
     }
 
   public:
+    struct DecoderSyscallStats : public statistics::Group
+    {
+        DecoderSyscallStats(statistics::Group *parent);
+        statistics::Scalar numSyscallsDecoded;
+    } syscallStats;
+
+    void logSyscall() override;
+
     StaticInstPtr decode(PCStateBase &next_pc) override;
 
     StaticInstPtr fetchRomMicroop(

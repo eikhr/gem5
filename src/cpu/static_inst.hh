@@ -102,6 +102,9 @@ class StaticInst : public RefCounted, public StaticInstFlags
     /// Flag values for this instruction.
     std::bitset<Num_Flags> flags;
 
+    // Immediate value for this instruction.
+    uint64_t immediate = 0;
+
     /// See opClass().
     OpClass _opClass;
 
@@ -209,6 +212,8 @@ class StaticInst : public RefCounted, public StaticInstFlags
     void setLastMicroop() { flags[IsLastMicroop] = true; }
     void setDelayedCommit() { flags[IsDelayedCommit] = true; }
     void setFlag(Flags f) { flags[f] = true; }
+    void setImm(uint64_t imm) { immediate = imm; }
+    uint64_t getImm() const { return immediate; }
 
     /// Operation class.  Used to select appropriate function unit in issue.
     OpClass opClass() const { return _opClass; }
