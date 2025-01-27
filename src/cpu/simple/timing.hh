@@ -275,8 +275,18 @@ class TimingSimpleCPU : public BaseSimpleCPU
     struct SyscallCPUStats : public statistics::Group
     {
         SyscallCPUStats(statistics::Group *parent);
-        statistics::Scalar numSyscalls;
+        statistics::Scalar numSyscallFaults;
+        statistics::Scalar numSyscallInstsFetched;
+        statistics::Scalar numSyscallOpsFetched;
+        statistics::Scalar numSyscallInstsIssued;
+        statistics::Scalar numSyscallOpsIssued;
+        statistics::Scalar numSyscallInstsCommitted;
+        statistics::Scalar numSyscallOpsCommitted;
     } syscallStats;
+
+    void countFetchInst() override;
+    void countInst() override;
+    void countCommitInst() override;
 
     DrainState drain() override;
     void drainResume() override;

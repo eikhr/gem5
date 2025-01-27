@@ -212,6 +212,10 @@ let {{
             micropc = 0
             for op in self.microops:
                 flags = ["IsMicroop"]
+
+                if self.getMnemonic() == "syscall": # or self.getMnemonic() == "int": #and op.imm == 0x80:
+                    flags.append("IsSyscall")
+
                 if micropc == 0:
                     flags.append("IsFirstMicroop")
 

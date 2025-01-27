@@ -682,6 +682,8 @@ Decoder::decode(ExtMachInst mach_inst, Addr addr)
         (*instMap)[mach_inst] = si;
     }
 
+    si->setImm(mach_inst.immediate);
+
     si->size(basePC + offset - origPC);
 
     DPRINTF(Decode, "Decode: Decoded %s instruction: %#x\n",

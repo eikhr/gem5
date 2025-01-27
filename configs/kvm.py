@@ -64,19 +64,23 @@ command = (
     "m5 exit;"
     + "echo 'This is running on Timing CPU cores.';"
     + "sleep 1;"
+    + "docker-compose -f /root/functions.yaml up syscalls;"
     + "m5 exit;"
 )
 
-disk_image_path = "/cluster/work/eikhr/resources/raw-image"
+disk_image_path = "/cluster/work/eikhr/vSwarm-u/wkdir/disk.img"
 
 workload = WorkloadResource(
     name="full_system_workload",
     local_path=disk_image_path,
     downloader=None,
+    function="",
     parameters={
         "readfile_contents": command,
     },
 )
+print(workload)
+
 board.set_workload(workload)
 
 simulator = Simulator(

@@ -69,8 +69,20 @@ TimingSimpleCPU::init()
 TimingSimpleCPU::
 SyscallCPUStats::SyscallCPUStats(statistics::Group *parent)
     : statistics::Group(parent),
-      ADD_STAT(numSyscalls, statistics::units::Count::get(),
-               "Number of syscalls")
+      ADD_STAT(numSyscallFaults, statistics::units::Count::get(),
+               "Number of syscall instructions fetched"),
+      ADD_STAT(numSyscallInstsFetched, statistics::units::Count::get(),
+               "Number of syscall instructions fetched"),
+      ADD_STAT(numSyscallOpsFetched, statistics::units::Count::get(),
+               "Number of syscall microops fetched"),
+      ADD_STAT(numSyscallInstsIssued, statistics::units::Count::get(),
+               "Number of syscall instructions issued"),
+      ADD_STAT(numSyscallOpsIssued, statistics::units::Count::get(),
+               "Number of syscall microops issued"),
+      ADD_STAT(numSyscallInstsCommitted, statistics::units::Count::get(),
+               "Number of syscall instructions fetched"),
+      ADD_STAT(numSyscallOpsCommitted, statistics::units::Count::get(),
+               "Number of syscall microops fetched")
 {
 }
 
@@ -94,6 +106,45 @@ TimingSimpleCPU::TimingSimpleCPU(const BaseTimingSimpleCPUParams &p)
 
 TimingSimpleCPU::~TimingSimpleCPU()
 {
+}
+
+void
+TimingSimpleCPU::countFetchInst()
+{
+    BaseSimpleCPU::countFetchInst();
+
+    if (curStaticInst->isSyscall()) {
+        if (!curStaticInst->isMicroop() || curStaticInst->isLastMicroop()) {
+            syscallStats.numSyscallInstsFetched++;
+        }
+        syscallStats.numSyscallOpsFetched++;
+    }
+}
+
+void
+TimingSimpleCPU::countInst()
+{
+    BaseSimpleCPU::countInst();
+
+    if (curStaticInst->isSyscall()) {
+        if (!curStaticInst->isMicroop() || curStaticInst->isLastMicroop()) {
+            syscallStats.numSyscallInstsIssued++;
+        }
+        syscallStats.numSyscallOpsIssued++;
+    }
+}
+
+void
+TimingSimpleCPU::countCommitInst()
+{
+    BaseSimpleCPU::countCommitInst();
+
+    if (curStaticInst->isSyscall()) {
+        if (!curStaticInst->isMicroop() || curStaticInst->isLastMicroop()) {
+            syscallStats.numSyscallInstsCommitted++;
+        }
+        syscallStats.numSyscallOpsCommitted++;
+    }
 }
 
 DrainState
@@ -790,6 +841,10 @@ TimingSimpleCPU::advanceInst(const Fault &fault)
 
         advancePC(fault);
 
+        if (std::dynamic_pointer_cast<SyscallRetryFault>(fault)) {
+            syscallStats.numSyscallFaults++;
+        }
+
         // A syscall fault could suspend this CPU (e.g., futex_wait)
         // If the _status is not Idle, schedule an event to fetch the next
         // instruction after 'stall' ticks.
@@ -848,12 +903,6 @@ TimingSimpleCPU::completeIfetch(PacketPtr pkt)
 
 
     preExecute();
-
-    if (curStaticInst && curStaticInst->isSyscall()) {
-        // Log syscall instruction
-        DPRINTF(SimpleCPU, "Syscall instruction encountered\n");
-        syscallStats.numSyscalls++;
-    }
 
     // hardware transactional memory
     if (curStaticInst && curStaticInst->isHtmStart()) {
