@@ -40,6 +40,7 @@
 #include "arch/x86/regs/int.hh"
 #include "arch/x86/regs/misc.hh"
 #include "base/types.hh"
+#include "base/statistics.hh"
 #include "cpu/reg_class.hh"
 
 namespace gem5
@@ -61,6 +62,13 @@ class ISA : public BaseISA
     std::string vendorString;
 
   public:
+    struct RegStats : public statistics::Group
+    {
+        RegStats(statistics::Group *parent);
+        statistics::Scalar cr3;
+    } regStats;
+
+
     void clear() override;
 
     PCStateBase *

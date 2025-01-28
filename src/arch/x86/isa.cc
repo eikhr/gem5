@@ -157,7 +157,8 @@ RegClass matRegClass(MatRegClass, MatRegClassName, 0, debug::MatRegs);
 } // anonymous namespace
 
 ISA::ISA(const X86ISAParams &p)
-    : BaseISA(p, "x86"), cpuid(new X86CPUID(p.vendor_string, p.name_string))
+    : BaseISA(p, "x86"), cpuid(new X86CPUID(p.vendor_string, p.name_string)),
+      regStats(this)
 {
     cpuid->addStandardFunc(FamilyModelStepping, p.FamilyModelStepping);
     cpuid->addStandardFunc(CacheParams, p.CacheParams);
@@ -338,10 +339,11 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
-        // print out the CR3 value
-        DPRINTF(MiscRegs, "CR3 (mode): %#x\n", val & 0xC0000000);
-        DPRINTF(MiscRegs, "CR3 (pid): %#x\n", val & 0x3FFFFFFF);
         statistics::dump();
+        // print out the new CR3 value
+        DPRINTF(MiscRegs, "CR3 (mode): %d\n", val & 0xC0000000);
+        DPRINTF(MiscRegs, "CR3 (pid?): %#x\n", val & 0x3FFFFFFF);
+        regStats.cr3 = val;
 
         static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
         break;
@@ -537,6 +539,12 @@ std::string
 ISA::getVendorString() const
 {
     return vendorString;
+}
+
+ISA::RegStats::RegStats(statistics::Group *parent)
+    : statistics::Group(parent),
+      ADD_STAT(cr3, statistics::units::Count::get(), "value of CR3 register")
+{
 }
 
 } // namespace X86ISA
