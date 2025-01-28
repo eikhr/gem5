@@ -18808,7 +18808,6 @@ def executeExit() -> bool:
             yield False
         print("Simulation done")
         m5.stats.dump()
-        m5.exit()
         yield True
 
 

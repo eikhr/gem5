@@ -338,6 +338,9 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
+        // print out the CR3 value
+        DPRINTF(MiscRegs, "CR3 (mode): %#x\n", val & 0xC0000000);
+        DPRINTF(MiscRegs, "CR3 (pid): %#x\n", val & 0x3FFFFFFF);
         static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
         break;
       case misc_reg::Cr4:
