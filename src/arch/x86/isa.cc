@@ -339,11 +339,11 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
-        statistics::dump();
-        // print out the new CR3 value
-        DPRINTF(MiscRegs, "CR3 (mode): %d\n", val & 0xC0000000);
-        DPRINTF(MiscRegs, "CR3 (pid?): %#x\n", val & 0x3FFFFFFF);
-        regStats.cr3 = val;
+        if (regStats.pcid.value() != (val & 0x00000FFF)) {
+          // PCID has changed!
+          statistics::dump();
+          regStats.pcid = val & 0x00000FFF;
+		}
 
         static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
         break;
@@ -543,7 +543,7 @@ ISA::getVendorString() const
 
 ISA::RegStats::RegStats(statistics::Group *parent)
     : statistics::Group(parent),
-      ADD_STAT(cr3, statistics::units::Count::get(), "value of CR3 register")
+      ADD_STAT(pcid, statistics::units::Count::get(), "PCID value in CR3 register")
 {
 }
 

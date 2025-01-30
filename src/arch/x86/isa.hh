@@ -65,7 +65,7 @@ class ISA : public BaseISA
     struct RegStats : public statistics::Group
     {
         RegStats(statistics::Group *parent);
-        statistics::Scalar cr3;
+        statistics::Scalar pcid;
     } regStats;
 
 
