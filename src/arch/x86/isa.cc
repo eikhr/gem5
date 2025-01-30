@@ -339,6 +339,8 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
+        DPRINTF(MiscRegs, "CR3 changed, CR3 is %#x\n", val);
+        DPRINTF(MiscRegs, "CR3 changed, PCID is %d\n", val & 0x00000FFF);
         if (regStats.pcid.value() != (val & 0x00000FFF)) {
           // PCID has changed!
           statistics::dump();
