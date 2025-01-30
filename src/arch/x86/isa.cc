@@ -339,18 +339,25 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
-        DPRINTF(MiscRegs, "CR3 changed, CR3 is %#x\n", val);
-        DPRINTF(MiscRegs, "CR3 changed, PCID is %d\n", val & 0x00000FFF);
-        if (regStats.pcid.value() != (val & 0x00000FFF)) {
-          // PCID has changed!
-          statistics::dump();
-          regStats.pcid = val & 0x00000FFF;
-		}
+        {
+         	CR3 prevPCID = regVal[idx] & 0x00000FFF;
+        	CR3 newPCID = val & 0x00000FFF;
+         	DPRINTF(MiscRegs, "CR3 changed, CR3 is %#x\n", val);
+         	DPRINTF(MiscRegs, "CR4: PCID_ENABLE is %d\n", regVal[misc_reg::Cr4] & (1<<17));
+        	DPRINTF(MiscRegs, "CR3 changed, PCID was %d, is now %d\n",prevPCID, newPCID);
+        	if (prevPCID != newPCID) {
+         	 	// PCID has changed!
+                regStats.pcid = prevPCID;
+          		statistics::dump();
+            	regStats.pcid = newPCID;
+			}
 
-        static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
-        break;
+        	static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
+        	break;
+        }
       case misc_reg::Cr4:
         {
+        	DPRINTF(MiscRegs, "CR4: PCID_ENABLE is %d\n", val & (1<<17));
             CR4 toggled = regVal[idx] ^ val;
             if (toggled.pae || toggled.pse || toggled.pge) {
                 tc->getMMUPtr()->flushAll();
