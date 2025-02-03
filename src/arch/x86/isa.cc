@@ -71,6 +71,7 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
         }
     }
     m5reg.cpl = csAttr.dpl;
+    regStats.cpl = csAttr.dpl;
     m5reg.paging = cr0.pg;
     m5reg.prot = cr0.pe;
 
@@ -342,9 +343,6 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         {
          	CR3 prevPCID = regVal[idx] & 0x00000FFF;
         	CR3 newPCID = val & 0x00000FFF;
-         	DPRINTF(MiscRegs, "CR3 changed, CR3 is %#x\n", val);
-         	DPRINTF(MiscRegs, "CR4: PCID_ENABLE is %d\n", regVal[misc_reg::Cr4] & (1<<17));
-        	DPRINTF(MiscRegs, "CR3 changed, PCID was %d, is now %d\n",prevPCID, newPCID);
         	if (prevPCID != newPCID) {
          	 	// PCID has changed!
                 regStats.pcid = prevPCID;
@@ -553,7 +551,8 @@ ISA::getVendorString() const
 
 ISA::RegStats::RegStats(statistics::Group *parent)
     : statistics::Group(parent),
-      ADD_STAT(pcid, statistics::units::Count::get(), "PCID value in CR3 register")
+      ADD_STAT(pcid, statistics::units::Count::get(), "PCID value in CR3 register"),
+      ADD_STAT(cpl, statistics::units::Count::get(), "Current privilege level")
 {
 }
 
