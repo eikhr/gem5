@@ -349,6 +349,7 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
          	 	// PCID has changed!
                 regStats.pcid = prevPCID;
           		statistics::dump();
+          		statistics::reset();
             	regStats.pcid = newPCID;
 			}
 
