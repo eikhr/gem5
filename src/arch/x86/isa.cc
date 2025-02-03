@@ -346,6 +346,8 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         	if (prevPCID != newPCID) {
          	 	// PCID has changed!
                 regStats.pcid = prevPCID;
+                HandyM5Reg m5Reg = regVal[misc_reg::M5Reg];
+                regStats.cpl = m5Reg.cpl;
           		statistics::dump();
           		statistics::reset();
             	regStats.pcid = newPCID;
