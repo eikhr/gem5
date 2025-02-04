@@ -60,16 +60,19 @@
 namespace gem5
 {
 
+void
+TimingSimpleCPU::dumpAndResetEvent()
+{
+    statistics::dump();
+    statistics::reset();
+}
+
 static uint64_t instsSinceLastDump = 0;
 
 void
 TimingSimpleCPU::init()
 {
     BaseSimpleCPU::init();
-
-    // Register the dump stats callback to reset instruction number.
-    statistics::registerResetCallback(
-        [this]() { instsSinceLastDump = 0; });
 }
 
 void
@@ -82,7 +85,8 @@ TimingSimpleCPU::TimingCPUPort::TickEvent::schedule(PacketPtr _pkt, Tick t)
 TimingSimpleCPU::TimingSimpleCPU(const BaseTimingSimpleCPUParams &p)
     : BaseSimpleCPU(p), fetchTranslation(this), icachePort(this),
       dcachePort(this), ifetch_pkt(NULL), dcache_pkt(NULL), previousCycle(0),
-      fetchEvent([this]{ fetch(); }, name())
+      fetchEvent([this]{ fetch(); }, name()),
+      dumpResetEvent(*this)
 {
     _status = Idle;
 }
@@ -99,9 +103,13 @@ TimingSimpleCPU::countInst()
     BaseSimpleCPU::countInst();
 
     instsSinceLastDump++;
-    if (instsSinceLastDump >= 5000000) {
-        statistics::dump();
-        statistics::reset();
+    if (instsSinceLastDump >= 5000000 && !dumpResetEvent.scheduled()) {
+      Counter totalInsts = globalStats->simInsts.value();
+      if (totalInsts < 5000000) {
+        instsSinceLastDump = totalInsts;
+      } else {
+        schedule(dumpResetEvent, nextCycle());
+      }
     }
 }
 

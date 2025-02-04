@@ -59,6 +59,11 @@ class TimingSimpleCPU : public BaseSimpleCPU
 
     void init() override;
 
+  protected:
+
+    void dumpAndResetEvent();
+    MemberEventWrapper<&TimingSimpleCPU::dumpAndResetEvent> dumpResetEvent;
+
   private:
 
     /*
