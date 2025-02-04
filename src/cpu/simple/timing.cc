@@ -60,10 +60,16 @@
 namespace gem5
 {
 
+static uint64_t instsSinceLastDump = 0;
+
 void
 TimingSimpleCPU::init()
 {
     BaseSimpleCPU::init();
+
+    // Register the dump stats callback to reset instruction number.
+    statistics::registerResetCallback(
+        [this]() { instsSinceLastDump = 0; });
 }
 
 void
@@ -85,6 +91,18 @@ TimingSimpleCPU::TimingSimpleCPU(const BaseTimingSimpleCPUParams &p)
 
 TimingSimpleCPU::~TimingSimpleCPU()
 {
+}
+
+void
+TimingSimpleCPU::countInst()
+{
+    BaseSimpleCPU::countInst();
+
+    instsSinceLastDump++;
+    if (instsSinceLastDump >= 5000000) {
+        statistics::dump();
+        statistics::reset();
+    }
 }
 
 DrainState

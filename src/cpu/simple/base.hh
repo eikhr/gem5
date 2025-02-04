@@ -181,7 +181,7 @@ class BaseSimpleCPU : public BaseCPU
         panic("initiateMemAMO() is not implemented\n");
     }
 
-    void countInst();
+    virtual void countInst();
     void countFetchInst();
     void countCommitInst();
     Counter totalInsts() const override;

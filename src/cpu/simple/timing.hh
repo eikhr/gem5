@@ -273,6 +273,8 @@ class TimingSimpleCPU : public BaseSimpleCPU
 
   public:
 
+    void countInst() override;
+
     DrainState drain() override;
     void drainResume() override;
 
