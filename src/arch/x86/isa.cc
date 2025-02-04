@@ -35,6 +35,7 @@
 #include "arch/x86/regs/int.hh"
 #include "arch/x86/regs/misc.hh"
 #include "base/compiler.hh"
+#include "cpu/kvm/base.hh"
 #include "cpu/base.hh"
 #include "cpu/thread_context.hh"
 #include "debug/MatRegs.hh"
@@ -73,7 +74,7 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
     HandyM5Reg prevM5reg = regVal[misc_reg::M5Reg];
 
     m5reg.cpl = csAttr.dpl;
-    if (prevM5reg.cpl != m5reg.cpl) {
+    if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevM5reg.cpl != m5reg.cpl) {
       statistics::dump();
       statistics::reset();
     }
@@ -349,7 +350,7 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         {
          	CR3 prevPCID = regVal[idx] & 0x00000FFF;
         	CR3 newPCID = val & 0x00000FFF;
-        	if (prevPCID != newPCID) {
+            if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevPCID != newPCID) {
          	 	// PCID has changed!
                 regStats.pcid = prevPCID;
           		statistics::dump();
