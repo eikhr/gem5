@@ -70,8 +70,14 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
             m5reg.submode = RealMode;
         }
     }
+    HandyM5Reg prevM5reg = regVal[misc_reg::M5Reg];
+
     m5reg.cpl = csAttr.dpl;
     regStats.cpl = csAttr.dpl;
+    if (prevM5reg.cpl != m5reg.cpl) {
+      statistics::dump();
+      statistics::reset();
+    }
     m5reg.paging = cr0.pg;
     m5reg.prot = cr0.pe;
 
@@ -346,8 +352,6 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         	if (prevPCID != newPCID) {
          	 	// PCID has changed!
                 regStats.pcid = prevPCID;
-                HandyM5Reg m5Reg = regVal[misc_reg::M5Reg];
-                regStats.cpl = m5Reg.cpl;
           		statistics::dump();
           		statistics::reset();
             	regStats.pcid = newPCID;
@@ -358,7 +362,6 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         }
       case misc_reg::Cr4:
         {
-        	DPRINTF(MiscRegs, "CR4: PCID_ENABLE is %d\n", val & (1<<17));
             CR4 toggled = regVal[idx] ^ val;
             if (toggled.pae || toggled.pse || toggled.pge) {
                 tc->getMMUPtr()->flushAll();
