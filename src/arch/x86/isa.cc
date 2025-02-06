@@ -74,11 +74,13 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
     HandyM5Reg prevM5reg = regVal[misc_reg::M5Reg];
 
     m5reg.cpl = csAttr.dpl;
+    // If we're not in KVM mode, we need to dump stats, then update the cpl in the stats
     if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevM5reg.cpl != m5reg.cpl) {
-      statistics::dump();
-      statistics::reset();
+        newCpl = m5reg.cpl;
+        if (!dumpStatsEvent.scheduled()) {
+            schedule(dumpStatsEvent, curTick() + 1);
+        }
     }
-    regStats.cpl = csAttr.dpl;
     m5reg.paging = cr0.pg;
     m5reg.prot = cr0.pe;
 
@@ -115,6 +117,15 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
     regVal[misc_reg::M5Reg] = m5reg;
     if (tc)
         tc->getDecoderPtr()->as<Decoder>().setM5Reg(m5reg);
+}
+
+void
+ISA::processDumpStatsEvent()
+{
+    statistics::dump();
+    statistics::reset();
+    regStats.cpl = newCpl;
+    regStats.pcid = newPcid;
 }
 
 void
@@ -165,8 +176,10 @@ RegClass matRegClass(MatRegClass, MatRegClassName, 0, debug::MatRegs);
 } // anonymous namespace
 
 ISA::ISA(const X86ISAParams &p)
-    : BaseISA(p, "x86"), cpuid(new X86CPUID(p.vendor_string, p.name_string)),
-      regStats(this)
+    : BaseISA(p, "x86"),
+      dumpStatsEvent([this]{ processDumpStatsEvent(); }, name() + ".dumpStatsEvent"),
+      regStats(this),
+      cpuid(new X86CPUID(p.vendor_string, p.name_string))
 {
     cpuid->addStandardFunc(FamilyModelStepping, p.FamilyModelStepping);
     cpuid->addStandardFunc(CacheParams, p.CacheParams);
@@ -351,11 +364,11 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
          	CR3 prevPCID = regVal[idx] & 0x00000FFF;
         	CR3 newPCID = val & 0x00000FFF;
             if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevPCID != newPCID) {
-         	 	// PCID has changed!
                 regStats.pcid = prevPCID;
-          		statistics::dump();
-          		statistics::reset();
-            	regStats.pcid = newPCID;
+                this->newPcid = newPCID;
+                if (!dumpStatsEvent.scheduled()) {
+                    schedule(dumpStatsEvent, curTick() + 1);
+                }
 			}
 
         	static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
