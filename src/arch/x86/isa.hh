@@ -64,7 +64,9 @@ class ISA : public BaseISA
 
     // Temporary holders for new cpl/pcid values to be set in statistics
     uint64_t newCpl;
+    bool cplChanged;
     uint64_t newPcid;
+    bool pcidChanged;
 
     // Dump statistics event (need event to make sure to dump stats at a safe time)
     EventFunctionWrapper dumpStatsEvent;

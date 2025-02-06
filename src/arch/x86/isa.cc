@@ -35,6 +35,7 @@
 #include "arch/x86/regs/int.hh"
 #include "arch/x86/regs/misc.hh"
 #include "base/compiler.hh"
+#include "base/trace.hh"
 #include "cpu/kvm/base.hh"
 #include "cpu/base.hh"
 #include "cpu/thread_context.hh"
@@ -75,9 +76,12 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
 
     m5reg.cpl = csAttr.dpl;
     // If we're not in KVM mode, we need to dump stats, then update the cpl in the stats
-    if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevM5reg.cpl != m5reg.cpl) {
+    if (prevM5reg.cpl != m5reg.cpl) {
         newCpl = m5reg.cpl;
-        if (!dumpStatsEvent.scheduled()) {
+        cplChanged = true;
+        if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && !dumpStatsEvent.scheduled()) {
+            DPRINTF(MiscRegs, "curTick(): %llu, eventQueue()->getCurTick(): %llu, nextTick: %llu\n",
+                curTick(), eventQueue()->getCurTick(), eventQueue()->nextTick());
             schedule(dumpStatsEvent, curTick() + 1);
         }
     }
@@ -124,8 +128,14 @@ ISA::processDumpStatsEvent()
 {
     statistics::dump();
     statistics::reset();
-    regStats.cpl = newCpl;
-    regStats.pcid = newPcid;
+    if (cplChanged) {
+        regStats.cpl = newCpl;
+        cplChanged = false;
+    }
+    if (pcidChanged) {
+        regStats.pcid = newPcid;
+        pcidChanged = false;
+    }
 }
 
 void
@@ -177,6 +187,7 @@ RegClass matRegClass(MatRegClass, MatRegClassName, 0, debug::MatRegs);
 
 ISA::ISA(const X86ISAParams &p)
     : BaseISA(p, "x86"),
+      cplChanged(false), pcidChanged(false),
       dumpStatsEvent([this]{ processDumpStatsEvent(); }, name() + ".dumpStatsEvent"),
       regStats(this),
       cpuid(new X86CPUID(p.vendor_string, p.name_string))
@@ -363,10 +374,13 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
         {
          	CR3 prevPCID = regVal[idx] & 0x00000FFF;
         	CR3 newPCID = val & 0x00000FFF;
-            if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && prevPCID != newPCID) {
+            if (prevPCID != newPCID) {
                 regStats.pcid = prevPCID;
                 this->newPcid = newPCID;
-                if (!dumpStatsEvent.scheduled()) {
+                pcidChanged = true;
+                if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && !dumpStatsEvent.scheduled()) {
+            DPRINTF(MiscRegs, "curTick(): %llu, eventQueue()->getCurTick(): %llu, nextTick: %llu\n",
+                curTick(), eventQueue()->getCurTick(), eventQueue()->nextTick());
                     schedule(dumpStatsEvent, curTick() + 1);
                 }
 			}
