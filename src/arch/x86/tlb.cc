@@ -145,6 +145,7 @@ void
 TLB::flushAll()
 {
     DPRINTF(TLB, "Invalidating all entries.\n");
+    stats.flushAllCount++;
     for (unsigned i = 0; i < size; i++) {
         if (tlb[i].trieHandle) {
             trie.remove(tlb[i].trieHandle);
@@ -164,6 +165,7 @@ void
 TLB::flushNonGlobal()
 {
     DPRINTF(TLB, "Invalidating all non global entries.\n");
+    stats.flushNonGlobalCount++;
     for (unsigned i = 0; i < size; i++) {
         if (tlb[i].trieHandle && !tlb[i].global) {
             trie.remove(tlb[i].trieHandle);
@@ -585,7 +587,11 @@ TLB::TlbStats::TlbStats(statistics::Group *parent)
     ADD_STAT(rdMisses, statistics::units::Count::get(),
              "TLB misses on read requests"),
     ADD_STAT(wrMisses, statistics::units::Count::get(),
-             "TLB misses on write requests")
+             "TLB misses on write requests"),
+    ADD_STAT(flushAllCount, statistics::units::Count::get(),
+             "Number of times all TLB entries were flushed"),
+    ADD_STAT(flushNonGlobalCount, statistics::units::Count::get(),
+             "Number of times non-global TLB entries were flushed")
 {
 }
 
