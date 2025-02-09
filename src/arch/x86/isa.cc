@@ -35,6 +35,8 @@
 #include "arch/x86/regs/int.hh"
 #include "arch/x86/regs/misc.hh"
 #include "base/compiler.hh"
+#include "base/trace.hh"
+#include "cpu/kvm/base.hh"
 #include "cpu/base.hh"
 #include "cpu/thread_context.hh"
 #include "debug/MatRegs.hh"
@@ -70,7 +72,17 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
             m5reg.submode = RealMode;
         }
     }
+    HandyM5Reg prevM5reg = regVal[misc_reg::M5Reg];
+
     m5reg.cpl = csAttr.dpl;
+    // If we're not in KVM mode, we need to dump stats, then update the cpl in the stats
+    if (prevM5reg.cpl != m5reg.cpl) {
+        newCpl = m5reg.cpl;
+        cplChanged = true;
+        if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && !dumpStatsEvent.scheduled()) {
+            schedule(dumpStatsEvent, curTick() + 1);
+        }
+    }
     m5reg.paging = cr0.pg;
     m5reg.prot = cr0.pe;
 
@@ -107,6 +119,21 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
     regVal[misc_reg::M5Reg] = m5reg;
     if (tc)
         tc->getDecoderPtr()->as<Decoder>().setM5Reg(m5reg);
+}
+
+void
+ISA::processDumpStatsEvent()
+{
+    statistics::dump();
+    statistics::reset();
+    if (cplChanged) {
+        regStats.cpl = newCpl;
+        cplChanged = false;
+    }
+    if (pcidChanged) {
+        regStats.pcid = newPcid;
+        pcidChanged = false;
+    }
 }
 
 void
@@ -157,7 +184,11 @@ RegClass matRegClass(MatRegClass, MatRegClassName, 0, debug::MatRegs);
 } // anonymous namespace
 
 ISA::ISA(const X86ISAParams &p)
-    : BaseISA(p, "x86"), cpuid(new X86CPUID(p.vendor_string, p.name_string))
+    : BaseISA(p, "x86"),
+      cplChanged(false), pcidChanged(false),
+      dumpStatsEvent([this]{ processDumpStatsEvent(); }, name() + ".dumpStatsEvent"),
+      regStats(this),
+      cpuid(new X86CPUID(p.vendor_string, p.name_string))
 {
     cpuid->addStandardFunc(FamilyModelStepping, p.FamilyModelStepping);
     cpuid->addStandardFunc(CacheParams, p.CacheParams);
@@ -338,8 +369,20 @@ ISA::setMiscReg(RegIndex idx, RegVal val)
       case misc_reg::Cr2:
         break;
       case misc_reg::Cr3:
-        static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
-        break;
+        {
+            CR3 prevPCID = regVal[idx] & 0x00000FFF;
+            CR3 newPCID = val & 0x00000FFF;
+            if (prevPCID != newPCID) {
+                regStats.pcid = prevPCID;
+                this->newPcid = newPCID;
+                pcidChanged = true;
+                if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && !dumpStatsEvent.scheduled()) {
+                    schedule(dumpStatsEvent, curTick() + 1);
+                }
+			}
+            static_cast<MMU *>(tc->getMMUPtr())->flushNonGlobal();
+            break;
+        }
       case misc_reg::Cr4:
         {
             CR4 toggled = regVal[idx] ^ val;
@@ -532,6 +575,13 @@ std::string
 ISA::getVendorString() const
 {
     return vendorString;
+}
+
+ISA::RegStats::RegStats(statistics::Group *parent)
+    : statistics::Group(parent),
+      ADD_STAT(pcid, statistics::units::Count::get(), "PCID value in CR3 register"),
+      ADD_STAT(cpl, statistics::units::Count::get(), "Current privilege level")
+{
 }
 
 } // namespace X86ISA
