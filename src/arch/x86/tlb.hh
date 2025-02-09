@@ -117,6 +117,9 @@ namespace X86ISA
             statistics::Scalar wrAccesses;
             statistics::Scalar rdMisses;
             statistics::Scalar wrMisses;
+
+            statistics::Scalar flushAllCount;
+            statistics::Scalar flushNonGlobalCount;
         } stats;
 
         Fault translateInt(bool read, RequestPtr req, ThreadContext *tc);
