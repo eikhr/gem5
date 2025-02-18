@@ -1531,12 +1531,6 @@ X86KvmCPU::updateCPUID()
 
         if (!isa->cpuid->hasSignificantIndex(function)) {
             isa->cpuid->doCpuid(tc, function, idx, cpuid);
-
-            // 🔹 Force PCID to be set if processing function 0x1
-            if (function == 0x1) {
-                cpuid.rcx |= (1 << 17); // Enable PCID in ECX
-            }
-
             m5_supported.push_back(makeKvmCpuid(function, idx, cpuid));
         } else {
             while (true) {
