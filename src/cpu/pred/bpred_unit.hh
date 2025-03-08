@@ -44,6 +44,7 @@
 
 #include <deque>
 
+#include "arch/x86/regs/misc.hh"
 #include "base/statistics.hh"
 #include "base/types.hh"
 #include "cpu/inst_seq.hh"
@@ -52,6 +53,7 @@
 #include "cpu/pred/indirect.hh"
 #include "cpu/pred/ras.hh"
 #include "cpu/static_inst.hh"
+#include "cpu/base.hh"
 #include "enums/TargetProvider.hh"
 #include "params/BranchPredictor.hh"
 #include "sim/probe/pmu.hh"
@@ -81,6 +83,10 @@ class BPredUnit : public SimObject
      * @param params The params object, that has the size of the BP and BTB.
      */
     BPredUnit(const Params &p);
+
+    void setCPU(BaseCPU *cpu) {
+        this->cpu = cpu;
+    }
 
     void regProbePoints() override;
 
@@ -196,7 +202,7 @@ class BPredUnit : public SimObject
      */
     bool BTBValid(ThreadID tid, Addr instPC)
     {
-        return btb->valid(tid, instPC);
+        return get_btb(tid)->valid(tid, instPC);
     }
 
     /**
@@ -210,7 +216,7 @@ class BPredUnit : public SimObject
     const PCStateBase *
     BTBLookup(ThreadID tid, PCStateBase &instPC)
     {
-        return btb->lookup(tid, instPC.instAddr());
+        return get_btb(tid)->lookup(tid, instPC.instAddr());
     }
 
     /**
@@ -226,7 +232,7 @@ class BPredUnit : public SimObject
     const StaticInstPtr
     BTBGetInst(ThreadID tid, Addr instPC)
     {
-        return btb->getInst(tid, instPC);
+        return get_btb(tid)->getInst(tid, instPC);
     }
 
     /**
@@ -238,7 +244,7 @@ class BPredUnit : public SimObject
     BTBUpdate(ThreadID tid, Addr instPC, const PCStateBase &target)
     {
         ++stats.BTBUpdates;
-        return btb->update(tid, instPC, target);
+        return get_btb(tid)->update(tid, instPC, target);
     }
 
 
@@ -340,6 +346,18 @@ class BPredUnit : public SimObject
 
     typedef std::deque<PredictorHistory*> History;
 
+    /**
+     * Kernel mode?? User mode???
+    */
+    bool isKernelMode(ThreadID tid)
+    {
+        if (!cpu) {
+          fatal("BPredUnit::isKernelMode() called before setCPU()\n");
+        }
+        ThreadContext *tc = cpu->getContext(tid);
+        X86ISA::HandyM5Reg m5reg = tc->readMiscRegNoEffect(X86ISA::misc_reg::M5Reg);
+        return (m5reg.cpl == 0);
+    }
 
     /**
      * Internal prediction function.
@@ -386,8 +404,16 @@ class BPredUnit : public SimObject
      */
     std::vector<History> predHist;
 
+    /** The assiciated CPU object */
+    BaseCPU * cpu;
+
     /** The BTB. */
-    BranchTargetBuffer * btb;
+    BranchTargetBuffer * btbUser;
+    BranchTargetBuffer * btbKernel;
+
+    BranchTargetBuffer * get_btb(ThreadID tid) {
+        return isKernelMode(tid) ? btbKernel : btbUser;
+    }
 
     /** The return address stack. */
     ReturnAddrStack * ras;

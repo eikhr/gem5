@@ -132,6 +132,7 @@ Fetch::Fetch(CPU *_cpu, const BaseO3CPUParams &params)
     }
 
     branchPred = params.branchPred;
+    branchPred->setCPU(cpu);
 
     for (ThreadID tid = 0; tid < numThreads; tid++) {
         decoder[tid] = params.decoder[tid];

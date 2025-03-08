@@ -54,7 +54,7 @@ class BranchType(Enum):
         "DirectCond",
         "DirectUncond",  # 'Direct',
         "IndirectCond",
-        "IndirectUncond",  #'Indirect',
+        "IndirectUncond",  # 'Indirect',
     ]
 
 
@@ -193,7 +193,8 @@ class BranchPredictor(SimObject):
         "Low-end CPUs predecoding might be used to identify branches. ",
     )
 
-    btb = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer (BTB)")
+    btbUser = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer user mode (BTB)")
+    btbKernel = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer kernel mode (BTB)")
     ras = Param.ReturnAddrStack(
         ReturnAddrStack(), "Return address stack, set to NULL to disable RAS."
     )

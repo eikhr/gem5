@@ -61,7 +61,8 @@ BPredUnit::BPredUnit(const Params &params)
       requiresBTBHit(params.requiresBTBHit),
       instShiftAmt(params.instShiftAmt),
       predHist(numThreads),
-      btb(params.btb),
+      btbUser(params.btbUser),
+      btbKernel(params.btbKernel),
       ras(params.ras),
       iPred(params.indirectBranchPred),
       stats(this)
@@ -176,6 +177,8 @@ BPredUnit::predict(const StaticInstPtr &inst, const InstSeqNum &seqNum,
      * necessary as modern front-end does not have a
      * chance to detect a branch without a BTB hit.
      */
+    BranchTargetBuffer * btb = get_btb(tid);
+
     stats.BTBLookups++;
     const PCStateBase * btb_target = btb->lookup(tid, pc.instAddr(), brType);
     if (btb_target) {
@@ -576,6 +579,8 @@ BPredUnit::squash(const InstSeqNum &squashed_sn,
         // Update the BTB for all mispredicted taken branches.
         // Always if `requiresBTBHit` is true otherwise only if the
         // branch was direct or no indirect predictor is available.
+        BranchTargetBuffer * btb = get_btb(tid);
+
         if (actually_taken &&
             (requiresBTBHit || hist->inst->isDirectCtrl() ||
             (!iPred && !hist->inst->isReturn()))) {
