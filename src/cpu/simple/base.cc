@@ -118,7 +118,7 @@ BaseSimpleCPU::BaseSimpleCPU(const BaseSimpleCPUParams &p)
         checker = NULL;
     }
 
-    branchPred->setCPU(this);
+//    branchPred->setCPU(this);
 }
 
 void
