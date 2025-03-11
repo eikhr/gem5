@@ -62,6 +62,7 @@ BPredUnit::BPredUnit(const Params &params)
       instShiftAmt(params.instShiftAmt),
       predHist(numThreads),
       btb(params.btb),
+      btbKernel(params.btbKernel),
       ras(params.ras),
       iPred(params.indirectBranchPred),
       stats(this)
@@ -176,6 +177,10 @@ BPredUnit::predict(const StaticInstPtr &inst, const InstSeqNum &seqNum,
      * necessary as modern front-end does not have a
      * chance to detect a branch without a BTB hit.
      */
+    bool isKernel = isKernelMode(tid);
+    DPRINTF(MiscRegs, "isKernelMode: %d\n", isKernel);
+    DPRINTF(MiscRegs, "btb: %p\n", btbKernel);
+
     stats.BTBLookups++;
     const PCStateBase * btb_target = btb->lookup(tid, pc.instAddr(), brType);
     if (btb_target) {

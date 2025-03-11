@@ -193,7 +193,8 @@ class BranchPredictor(SimObject):
         "Low-end CPUs predecoding might be used to identify branches. ",
     )
 
-    btb = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer (BTB)")
+    btb = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer user mode (BTB)")
+    btbKernel = Param.BranchTargetBuffer(SimpleBTB(), "Branch target buffer kernel mode (BTB)")
     ras = Param.ReturnAddrStack(
         ReturnAddrStack(), "Return address stack, set to NULL to disable RAS."
     )
