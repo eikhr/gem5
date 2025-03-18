@@ -53,6 +53,7 @@
 #include "mem/cache/tags/indexing_policies/base.hh"
 #include "params/BTBIndexingPolicy.hh"
 #include "params/BTBSetAssociative.hh"
+#include "mem/cache/replacement_policies/lru_rp.hh"
 
 namespace gem5 {
 
@@ -235,9 +236,13 @@ class BTBEntry : public ReplaceableEntry
     std::string
     print() const override
     {
-        return csprintf("tag: %#x tid: %d valid: %d | %s", tag.address, tag.tid,
-                        isValid(), ReplaceableEntry::print());
+        unsigned touchcount = std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(this->replacementData)->touchCount;
+        return csprintf("tag: %#x tid: %d valid: %d touches: %d | %s", tag.address, tag.tid,
+                        isValid(), touchcount, ReplaceableEntry::print());
     }
+
+    /** The entry's tag. */
+    KeyType tag;
 
   protected:
     /**
@@ -264,8 +269,6 @@ class BTBEntry : public ReplaceableEntry
      */
     bool valid;
 
-    /** The entry's tag. */
-    KeyType tag;
 };
 
 } // namespace gem5::branch_prediction

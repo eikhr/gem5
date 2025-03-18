@@ -47,12 +47,15 @@ namespace replacement_policy
 
 class LRU : public Base
 {
-  protected:
+  public:
     /** LRU-specific implementation of replacement data. */
     struct LRUReplData : ReplacementData
     {
         /** Tick on which the entry was last touched. */
         Tick lastTouchTick;
+
+        /** Total number of touches to this entry since it was reset. */
+        unsigned touchCount;
 
         /**
          * Default constructor. Invalidate data.
@@ -60,7 +63,6 @@ class LRU : public Base
         LRUReplData() : lastTouchTick(0) {}
     };
 
-  public:
     typedef LRURPParams Params;
     LRU(const Params &p);
     ~LRU() = default;
