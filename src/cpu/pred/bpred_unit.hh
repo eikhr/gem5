@@ -58,6 +58,7 @@
 #include "params/BranchPredictor.hh"
 #include "sim/probe/pmu.hh"
 #include "sim/sim_object.hh"
+#include "debug/SplitBTB.hh"
 
 namespace gem5
 {
@@ -412,7 +413,7 @@ class BPredUnit : public SimObject
     BranchTargetBuffer * btbKernel;
 
     BranchTargetBuffer * get_btb(ThreadID tid) {
-        return isKernelMode(tid) ? btbKernel : btbUser;
+        return isKernelMode(tid) && ::gem5::debug::SplitBTB ? btbKernel : btbUser;
     }
 
     /** The return address stack. */
