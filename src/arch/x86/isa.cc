@@ -41,8 +41,10 @@
 #include "cpu/thread_context.hh"
 #include "debug/MatRegs.hh"
 #include "debug/X86.hh"
+#include "debug/CPL_STATS.hh"
 #include "params/X86ISA.hh"
 #include "sim/serialize.hh"
+#include "base/debug.hh"
 
 namespace gem5
 {
@@ -76,10 +78,10 @@ ISA::updateHandyM5Reg(Efer efer, CR0 cr0,
 
     m5reg.cpl = csAttr.dpl;
     // If we're not in KVM mode, we need to dump stats, then update the cpl in the stats
-    if (prevM5reg.cpl != m5reg.cpl) {
+    if (::gem5::debug::CPL_STATS && prevM5reg.cpl != m5reg.cpl && dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr) {
         newCpl = m5reg.cpl;
         cplChanged = true;
-        if (dynamic_cast<BaseKvmCPU *>(tc->getCpuPtr()) == nullptr && !dumpStatsEvent.scheduled()) {
+        if (!dumpStatsEvent.scheduled()) {
             schedule(dumpStatsEvent, curTick() + 1);
         }
     }
