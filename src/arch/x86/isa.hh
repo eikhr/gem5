@@ -62,11 +62,9 @@ class ISA : public BaseISA
     std::string vendorString;
 
 
-    // Temporary holders for new cpl/pcid values to be set in statistics
+    // Temporary holders for new cpl values to be set in statistics
     uint64_t newCpl;
     bool cplChanged;
-    uint64_t newPcid;
-    bool pcidChanged;
 
     // Dump statistics event (need event to make sure to dump stats at a safe time)
     EventFunctionWrapper dumpStatsEvent;
@@ -76,7 +74,6 @@ class ISA : public BaseISA
     struct RegStats : public statistics::Group
     {
         RegStats(statistics::Group *parent);
-        statistics::Scalar pcid;
         statistics::Scalar cpl;
     } regStats;
 
