@@ -889,6 +889,10 @@ FetchCPUStats::FetchCPUStats(statistics::Group *parent, int thread_id)
     : statistics::Group(parent, csprintf("fetchStats%i", thread_id).c_str()),
     ADD_STAT(numInsts, statistics::units::Count::get(),
              "Number of instructions fetched (thread level)"),
+    ADD_STAT(numInstsKernel, statistics::units::Count::get(),
+             "Number of instructions fetched in kernel mode (thread level)"),
+    ADD_STAT(numInstsUser, statistics::units::Count::get(),
+             "Number of instructions fetched in user mode (thread level)"),
     ADD_STAT(numOps, statistics::units::Count::get(),
              "Number of ops (including micro ops) fetched (thread level)"),
     ADD_STAT(fetchRate, statistics::units::Rate<

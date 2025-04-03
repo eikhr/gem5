@@ -264,6 +264,9 @@ class Fetch
     /** For priority-based fetch policies, need to keep update priorityList */
     void deactivateThread(ThreadID tid);
   private:
+    /** Is this thread in kernel mode? */
+    bool isKernelMode(ThreadID tid);
+
     /** Reset this pipeline stage */
     void resetStage();
 

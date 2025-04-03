@@ -289,6 +289,14 @@ Fetch::clearStates(ThreadID tid)
     // priorityList.push_back(tid);
 }
 
+bool
+Fetch::isKernelMode(ThreadID tid)
+{
+    gem5::ThreadContext *tc = cpu->getContext(tid);
+    X86ISA::HandyM5Reg m5reg = tc->readMiscRegNoEffect(X86ISA::misc_reg::M5Reg);
+    return (m5reg.cpl == 0);
+}
+
 void
 Fetch::resetStage()
 {
@@ -1222,6 +1230,11 @@ Fetch::fetch(bool &status_change)
 
                     // Increment stat of fetched instructions.
                     cpu->fetchStats[tid]->numInsts++;
+                    if (isKernelMode(tid)) {
+                        cpu->fetchStats[tid]->numKernelInsts++;
+                    } else {
+                        cpu->fetchStats[tid]->numUserInsts++;
+                    }
 
                     if (staticInst->isMacroop()) {
                         curMacroop = staticInst;

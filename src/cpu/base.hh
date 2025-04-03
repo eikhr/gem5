@@ -720,6 +720,10 @@ class BaseCPU : public ClockedObject
         /* Total number of instructions fetched */
         statistics::Scalar numInsts;
 
+        /* Number of instructions fetched per cpl */
+        statistics::Scalar numInstsKernel;
+        statistics::Scalar numInstsUser;
+
         /* Total number of operations fetched */
         statistics::Scalar numOps;
 
