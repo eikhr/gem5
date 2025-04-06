@@ -180,7 +180,7 @@ BPredUnit::predict(const StaticInstPtr &inst, const InstSeqNum &seqNum,
     BranchTargetBuffer * btb = get_btb(tid);
 
     stats.BTBLookups++;
-    const PCStateBase * btb_target = btb->lookup(tid, pc.instAddr(), brType);
+    const PCStateBase * btb_target = btb->lookup(tid, pc.instAddr(), isKernelMode(tid), brType);
     if (btb_target) {
         stats.BTBHits++;
         hist->btbHit = true;

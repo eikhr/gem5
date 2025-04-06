@@ -1231,9 +1231,9 @@ Fetch::fetch(bool &status_change)
                     // Increment stat of fetched instructions.
                     cpu->fetchStats[tid]->numInsts++;
                     if (isKernelMode(tid)) {
-                        cpu->fetchStats[tid]->numKernelInsts++;
+                        cpu->fetchStats[tid]->numInstsKernel++;
                     } else {
-                        cpu->fetchStats[tid]->numUserInsts++;
+                        cpu->fetchStats[tid]->numInstsUser++;
                     }
 
                     if (staticInst->isMacroop()) {

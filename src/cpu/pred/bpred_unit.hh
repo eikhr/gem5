@@ -217,7 +217,7 @@ class BPredUnit : public SimObject
     const PCStateBase *
     BTBLookup(ThreadID tid, PCStateBase &instPC)
     {
-        return get_btb(tid)->lookup(tid, instPC.instAddr());
+        return get_btb(tid)->lookup(tid, instPC.instAddr(), isKernelMode(tid));
     }
 
     /**

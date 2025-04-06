@@ -58,6 +58,10 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
     : statistics::Group(parent),
       ADD_STAT(lookups, statistics::units::Count::get(),
                "Number of BTB lookups"),
+      ADD_STAT(lookupsKernel, statistics::units::Count::get(),
+               "Number of BTB lookups in kernel mode"),
+      ADD_STAT(lookupsUser, statistics::units::Count::get(),
+               "Number of BTB lookups in user mode"),
       ADD_STAT(misses, statistics::units::Count::get(),
                "Number of BTB misses"),
       ADD_STAT(updates, statistics::units::Count::get(),
@@ -70,6 +74,14 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
 {
     using namespace statistics;
     lookups
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
+    lookupsUser
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
+    lookupsKernel
         .init(enums::Num_BranchType)
         .flags(total | pdf);
 

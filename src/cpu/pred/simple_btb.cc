@@ -84,9 +84,14 @@ SimpleBTB::valid(ThreadID tid, Addr instPC)
 // address is valid, and also the address.  For now will just use addr = 0 to
 // represent invalid entry.
 const PCStateBase *
-SimpleBTB::lookup(ThreadID tid, Addr instPC, BranchType type)
+SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
 {
     stats.lookups[type]++;
+  	if (isKernelMode) {
+        stats.lookupsKernel[type]++;
+    } else {
+        stats.lookupsUser[type]++;
+    }
 
     BTBEntry *entry = btb.accessEntry({instPC, tid});
 
