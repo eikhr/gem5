@@ -122,8 +122,9 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
 {
     stats.updates[type]++;
 
-    BTBEntry *victim = btb.findVictim({instPC, tid});
-    if (victim->tag.address != MaxAddr) {
+    bool wasValid;
+    BTBEntry *victim = btb.findVictim({instPC, tid}, &wasValid);
+    if (wasValid) {
         stats.evictions++;
         cprintf("Evicting entry: %s\n", victim->print());
     }

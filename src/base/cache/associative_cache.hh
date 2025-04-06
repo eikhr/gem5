@@ -226,16 +226,24 @@ class AssociativeCache : public Named
      * @result entry to be victimized
      */
     virtual Entry*
-    findVictim(const KeyType &key)
+    findVictim(const KeyType &key, bool * wasValid = nullptr)
     {
+        if (wasValid) {
+            *wasValid = false;
+        }
+
         auto candidates = indexingPolicy->getPossibleEntries(key);
 
         auto victim = static_cast<Entry*>(replPolicy->getVictim(candidates));
 
-        if (debugFlag && debugFlag->tracing() && victim->isValid()) {
-            ::gem5::trace::getDebugLogger()->dprintf_flag(
-                curTick(), name(), debugFlag->name(),
-                "Replacing entry: %s\n", victim->print());
+        if (victim->isValid()) {
+          *wasValid = true;
+
+          if (debugFlag && debugFlag->tracing()) {
+              ::gem5::trace::getDebugLogger()->dprintf_flag(
+                  curTick(), name(), debugFlag->name(),
+                  "Replacing entry: %s\n", victim->print());
+          }
         }
 
         invalidate(victim);
