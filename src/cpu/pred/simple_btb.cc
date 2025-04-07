@@ -43,6 +43,7 @@
 #include "base/intmath.hh"
 #include "base/trace.hh"
 #include "debug/BTB.hh"
+#include "mem/probes/stack_dist.hh"
 
 namespace gem5::branch_prediction
 {
@@ -51,7 +52,8 @@ SimpleBTB::SimpleBTB(const SimpleBTBParams &p)
     : BranchTargetBuffer(p),
       btb("simpleBTB", p.numEntries, p.associativity,
           p.btbReplPolicy, p.btbIndexingPolicy,
-          BTBEntry(genTagExtractor(p.btbIndexingPolicy)))
+          BTBEntry(genTagExtractor(p.btbIndexingPolicy))),
+      stackDistProbe(p.stackDistProbe)
 {
     DPRINTF(BTB, "BTB: Creating BTB object.\n");
 
@@ -87,13 +89,22 @@ const PCStateBase *
 SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
 {
     stats.lookups[type]++;
-  	if (isKernelMode) {
+    if (isKernelMode) {
         stats.lookupsKernel[type]++;
     } else {
         stats.lookupsUser[type]++;
     }
 
     BTBEntry *entry = btb.accessEntry({instPC, tid});
+    
+    if (stackDistProbe) {
+        // Create a dummy packet for the probe
+        RequestPtr req = std::make_shared<Request>(instPC, 1, 0, 0);
+        PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+        probing::PacketInfo pkt_info(pkt);
+        stackDistProbe->handleRequest(pkt_info);
+        delete pkt;
+    }
 
     if (entry) {
         return entry->target.get();
@@ -131,6 +142,15 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
 
     btb.insertEntry({instPC, tid}, victim);
     victim->update(target, inst);
+
+    if (stackDistProbe) {
+        // Create a dummy packet for the probe
+        RequestPtr req = std::make_shared<Request>(instPC, 1, 0, 0);
+        PacketPtr pkt = new Packet(req, MemCmd::WriteReq);
+        probing::PacketInfo pkt_info(pkt);
+        stackDistProbe->handleRequest(pkt_info);
+        delete pkt;
+    }
 }
 
 

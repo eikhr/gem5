@@ -68,7 +68,6 @@ class BaseMemProbe : public SimObject
 
     void regProbeListeners() override;
 
-  protected:
     /**
      * Callback to analyse intercepted Packets.
      */

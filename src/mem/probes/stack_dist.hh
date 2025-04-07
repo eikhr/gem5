@@ -53,7 +53,6 @@ class StackDistProbe : public BaseMemProbe
   public:
     StackDistProbe(const StackDistProbeParams &params);
 
-  protected:
     void handleRequest(const probing::PacketInfo &pkt_info) override;
 
   protected:

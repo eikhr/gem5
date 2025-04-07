@@ -49,6 +49,7 @@
 #include "mem/cache/replacement_policies/replaceable_entry.hh"
 #include "mem/cache/tags/indexing_policies/base.hh"
 #include "params/SimpleBTB.hh"
+#include "mem/probes/stack_dist.hh"
 
 namespace gem5::branch_prediction
 {
@@ -77,6 +78,9 @@ class SimpleBTB : public BranchTargetBuffer
 
     /** The actual BTB. */
     AssociativeCache<BTBEntry> btb;
+    
+    /** Stack distance probe for BTB accesses */
+    StackDistProbe *stackDistProbe;
 };
 
 } // namespace gem5::branch_prediction

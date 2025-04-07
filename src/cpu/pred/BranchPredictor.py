@@ -40,6 +40,7 @@
 from m5.objects.ClockedObject import ClockedObject
 from m5.objects.IndexingPolicies import *
 from m5.objects.ReplacementPolicies import *
+from m5.objects.StackDistProbe import StackDistProbe
 from m5.params import *
 from m5.proxy import *
 from m5.SimObject import *

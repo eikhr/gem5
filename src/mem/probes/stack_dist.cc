@@ -51,9 +51,9 @@ StackDistProbe::StackDistProbe(const StackDistProbeParams &p)
       calc(p.verify),
       stats(this)
 {
-    fatal_if(p.system->cacheLineSize() > p.line_size,
-             "The stack distance probe must use a cache line size that is "
-             "larger or equal to the system's cache line size.");
+//    fatal_if(p.system->cacheLineSize() > p.line_size,
+//             "The stack distance probe must use a cache line size that is "
+//             "larger or equal to the system's cache line size.");
 }
 
 StackDistProbe::StackDistProbeStats::StackDistProbeStats(

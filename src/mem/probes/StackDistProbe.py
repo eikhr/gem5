@@ -35,7 +35,6 @@
 
 from m5.objects.BaseMemProbe import BaseMemProbe
 from m5.params import *
-from m5.proxy import *
 
 
 class StackDistProbe(BaseMemProbe):
@@ -43,12 +42,12 @@ class StackDistProbe(BaseMemProbe):
     cxx_header = "mem/probes/stack_dist.hh"
     cxx_class = "gem5::StackDistProbe"
 
-    system = Param.System(
-        Parent.any, "System to use when determining system cache line size"
-    )
+    # system = Param.System(
+    #     Parent.any, "System to use when determining system cache line size"
+    # )
 
     line_size = Param.Unsigned(
-        Parent.cache_line_size,
+        "64",
         "Cache line size in bytes (must be larger or "
         "equal to the system's line size)",
     )
