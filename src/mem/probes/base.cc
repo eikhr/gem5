@@ -53,11 +53,11 @@ BaseMemProbe::regProbeListeners()
     const BaseMemProbeParams &p =
         dynamic_cast<const BaseMemProbeParams &>(params());
 
-    listeners.resize(p.manager.size());
-    for (int i = 0; i < p.manager.size(); i++) {
-        ProbeManager *const mgr(p.manager[i]->getProbeManager());
-        listeners[i].reset(new PacketListener(*this, mgr, p.probe_name));
-    }
+//    listeners.resize(p.manager.size());
+//    for (int i = 0; i < p.manager.size(); i++) {
+//        ProbeManager *const mgr(p.manager[i]->getProbeManager());
+//        listeners[i].reset(new PacketListener(*this, mgr, p.probe_name));
+//    }
 }
 
 } // namespace gem5

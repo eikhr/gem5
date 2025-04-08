@@ -34,7 +34,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 from m5.params import *
-from m5.proxy import *
 from m5.SimObject import SimObject
 
 
@@ -44,7 +43,7 @@ class BaseMemProbe(SimObject):
     cxx_header = "mem/probes/base.hh"
     cxx_class = "gem5::BaseMemProbe"
 
-    manager = VectorParam.SimObject(
-        Parent.any, "Probe manager(s) to instrument"
-    )
+    # manager = VectorParam.SimObject(
+    #     Parent.any, "Probe manager(s) to instrument"
+    # )
     probe_name = Param.String("PktRequest", "Memory request probe to use")
