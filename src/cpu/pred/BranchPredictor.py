@@ -140,6 +140,9 @@ class SimpleBTB(BranchTargetBuffer):
         ),
         "BTB indexing policy",
     )
+    stackDistProbe = Param.StackDistProbe(
+        StackDistProbe(), "Stack distance probe for BTB"
+    )
 
 
 class IndirectPredictor(SimObject):

@@ -241,9 +241,6 @@ class BTBEntry : public ReplaceableEntry
                         isValid(), touchcount, ReplaceableEntry::print());
     }
 
-    /** The entry's tag. */
-    KeyType tag;
-
   protected:
     /**
      * Set tag associated to this block.
@@ -268,6 +265,9 @@ class BTBEntry : public ReplaceableEntry
      * @sa insert()
      */
     bool valid;
+
+    /** The entry's tag. */
+    KeyType tag;
 
 };
 
