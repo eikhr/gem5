@@ -137,7 +137,7 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
     BTBEntry *victim = btb.findVictim({instPC, tid}, &wasValid);
     if (wasValid) {
         stats.evictions++;
-        cprintf("Evicting entry: %s\n", victim->print());
+        DPRINTF(BTB, "Evicting entry: %s\n", victim->print());
     }
 
     btb.insertEntry({instPC, tid}, victim);
