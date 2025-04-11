@@ -367,6 +367,19 @@ CPU::tick()
     assert(drainState() != DrainState::Drained);
 
     ++baseStats.numCycles;
+
+    if (!rob.isEmpty()) {
+        const DynInstPtr &head_inst = *rob.head;
+        gem5::ThreadContext *tc = getContext(head_inst->threadNumber);
+        const X86ISA::HandyM5Reg m5reg = tc->readMiscRegNoEffect(X86ISA::misc_reg::M5Reg);
+        const bool isKernelMode = m5reg.cpl == 0;
+        if (isKernelMode) {
+            ++baseStats.numCyclesKernel;
+        } else {
+            ++baseStats.numCyclesUser;
+        }
+    }
+
     updateCycleCounters(BaseCPU::CPU_STATE_ON);
 
 //    activity = false;

@@ -419,6 +419,10 @@ BaseCPUStats::BaseCPUStats(statistics::Group *parent)
     : statistics::Group(parent),
       ADD_STAT(numCycles, statistics::units::Cycle::get(),
                "Number of cpu cycles simulated"),
+      ADD_STAT(numCyclesKernel, statistics::units::Cycle::get(),
+               "Number of cpu cycles with kernel inst at head of ROB"),
+      ADD_STAT(numCyclesUser, statistics::units::Cycle::get(),
+               "Number of cpu cycles with user inst at head of ROB"),
       ADD_STAT(cpi, statistics::units::Rate<
                 statistics::units::Cycle, statistics::units::Count>::get(),
                "CPI: cycles per instruction (core level)"),
