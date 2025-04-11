@@ -81,6 +81,14 @@ Commit::processTrapEvent(ThreadID tid)
     trapSquash[tid] = true;
 }
 
+bool
+Commit::isKernelMode(ThreadID tid)
+{
+  gem5::ThreadContext *tc = cpu->getContext(tid);
+  X86ISA::HandyM5Reg m5reg = tc->readMiscRegNoEffect(X86ISA::misc_reg::M5Reg);
+  return (m5reg.cpl == 0);
+}
+
 Commit::Commit(CPU *_cpu, const BaseO3CPUParams &params)
     : commitPolicy(params.smtCommitPolicy),
       cpu(_cpu),
@@ -1351,6 +1359,11 @@ Commit::updateComInstStats(const DynInstPtr &inst)
 
     if (!inst->isMicroop() || inst->isLastMicroop()) {
         cpu->commitStats[tid]->numInsts++;
+        if (isKernelMode(tid)) {
+            cpu->commitStats[tid]->numInstsKernel++;
+        } else {
+            cpu->commitStats[tid]->numInstsUser++;
+        }
         cpu->baseStats.numInsts++;
     }
     cpu->commitStats[tid]->numOps++;

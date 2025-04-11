@@ -812,6 +812,10 @@ class BaseCPU : public ClockedObject
         statistics::Scalar numInsts;
         statistics::Scalar numOps;
 
+        /* Number of instructions committed per cpl */
+        statistics::Scalar numInstsKernel;
+        statistics::Scalar numInstsUser;
+
         /* Number of instructions committed that are not NOP or prefetches */
         statistics::Scalar numInstsNotNOP;
         statistics::Scalar numOpsNotNOP;
