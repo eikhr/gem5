@@ -446,6 +446,10 @@ class CPU : public BaseCPU
 
     std::vector<BaseISA *> isa;
 
+    bool prevInstKernelMode;
+
+    int numEmptyCycles;
+
   public:
     /** Enum to give each stage a specific index, so when calling
      *  activateStage() or deactivateStage(), they can specify which stage

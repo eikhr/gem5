@@ -667,6 +667,7 @@ class BaseCPU : public ClockedObject
         statistics::Scalar numCycles;
         statistics::Scalar numCyclesKernel;
         statistics::Scalar numCyclesUser;
+        statistics::Scalar numCyclesWasted;
         /* CPI/IPC for total cycle counts and macro insts */
         statistics::Formula cpi;
         statistics::Formula ipc;

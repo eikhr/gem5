@@ -102,6 +102,9 @@ CPU::CPU(const BaseO3CPUParams &params)
 
       isa(numThreads, NULL),
 
+      prevInstKernelMode(false),
+      numEmptyCycles(0),
+
       timeBuffer(params.backComSize, params.forwardComSize),
       fetchQueue(params.backComSize, params.forwardComSize),
       decodeQueue(params.backComSize, params.forwardComSize),
@@ -368,16 +371,29 @@ CPU::tick()
 
     ++baseStats.numCycles;
 
-    if (!rob.isEmpty()) {
+    if (rob.isEmpty()) {
+      ++numEmptyCycles;
+    } else {
         const DynInstPtr &head_inst = *rob.head;
         gem5::ThreadContext *tc = getContext(head_inst->threadNumber);
         const X86ISA::HandyM5Reg m5reg = tc->readMiscRegNoEffect(X86ISA::misc_reg::M5Reg);
         const bool isKernelMode = m5reg.cpl == 0;
-        if (isKernelMode) {
-            ++baseStats.numCyclesKernel;
+
+        int attributedEmptyCycles = 0;
+        if (isKernelMode == prevInstKernelMode) {
+            attributedEmptyCycles = numEmptyCycles;
         } else {
-            ++baseStats.numCyclesUser;
+            baseStats.numCyclesWasted += numEmptyCycles;
         }
+
+        if (isKernelMode) {
+            baseStats.numCyclesKernel += attributedEmptyCycles + 1;
+        } else {
+            baseStats.numCyclesUser += attributedEmptyCycles + 1;
+        }
+
+        numEmptyCycles = 0;
+        prevInstKernelMode = isKernelMode;
     }
 
     updateCycleCounters(BaseCPU::CPU_STATE_ON);

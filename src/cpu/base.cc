@@ -423,6 +423,8 @@ BaseCPUStats::BaseCPUStats(statistics::Group *parent)
                "Number of cpu cycles with kernel inst at head of ROB"),
       ADD_STAT(numCyclesUser, statistics::units::Cycle::get(),
                "Number of cpu cycles with user inst at head of ROB"),
+      ADD_STAT(numCyclesWasted, statistics::units::Cycle::get(),
+               "Number of cpu cycles with empty ROB between user and kernel mode"),
       ADD_STAT(cpi, statistics::units::Rate<
                 statistics::units::Cycle, statistics::units::Count>::get(),
                "CPI: cycles per instruction (core level)"),
