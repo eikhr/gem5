@@ -97,16 +97,16 @@ SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
 
     BTBEntry *entry = btb.accessEntry({instPC, tid});
     
-    if (stackDistProbe) {
+
+    if (entry) {
+      if (stackDistProbe) {
         // Create a dummy packet for the probe
         RequestPtr req = std::make_shared<Request>(instPC, 1, 0, 0);
         PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
         probing::PacketInfo pkt_info(pkt);
         stackDistProbe->handleRequest(pkt_info);
         delete pkt;
-    }
-
-    if (entry) {
+      }
         return entry->target.get();
     }
 
