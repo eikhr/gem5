@@ -1361,8 +1361,24 @@ Commit::updateComInstStats(const DynInstPtr &inst)
         cpu->commitStats[tid]->numInsts++;
         if (isKernelMode(tid)) {
             cpu->commitStats[tid]->numInstsKernel++;
+            if (lastInstKernel) {
+				numInstsCurrentMode++;
+            } else {
+				int lg2 = numInstsCurrentMode == 0 ? 1 : floorLog2(numInstsCurrentMode);
+				cpu->commitStats[tid]->userPeriodsLog.sample(lg2);
+				lastInstKernel = true;
+				numInstsCurrentMode = 1;
+            }
         } else {
             cpu->commitStats[tid]->numInstsUser++;
+            if (!lastInstKernel) {
+				numInstsCurrentMode++;
+            } else {
+				int lg2 = numInstsCurrentMode == 0 ? 1 : floorLog2(numInstsCurrentMode);
+				cpu->commitStats[tid]->kernelPeriodsLog.sample(lg2);
+				lastInstKernel = false;
+				numInstsCurrentMode = 1;
+            }
         }
         cpu->baseStats.numInsts++;
     }

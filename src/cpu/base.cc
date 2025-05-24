@@ -1026,6 +1026,10 @@ CommitCPUStats::CommitCPUStats(statistics::Group *parent, int thread_id)
              "Number of instructions committed in kernel mode (thread level)"),
     ADD_STAT(numInstsUser, statistics::units::Count::get(),
              "Number of instructions committed in user mode (thread level)"),
+    ADD_STAT(kernelPeriodsLog, statistics::units::Ratio::get(),
+             "Length of kernel periods in the commit stage (thread level)"),
+    ADD_STAT(userPeriodsLog, statistics::units::Ratio::get(),
+             "Length of user periods in the commit stage (thread level)"),
     ADD_STAT(numOps, statistics::units::Count::get(),
              "Number of ops (including micro ops) committed (thread level)"),
     ADD_STAT(numInstsNotNOP, statistics::units::Count::get(),
@@ -1057,6 +1061,13 @@ CommitCPUStats::CommitCPUStats(statistics::Group *parent, int thread_id)
 {
     numInsts
         .prereq(numInsts);
+
+    kernelPeriodsLog
+        .init(32)
+        .flags(statistics::pdf);
+    userPeriodsLog
+        .init(32)
+        .flags(statistics::pdf);
 
     cpi.precision(6);
     ipc.precision(6);

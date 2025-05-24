@@ -112,6 +112,9 @@ class Commit
     };
 
   private:
+    bool lastInstKernel = false; /**< Last instruction was in kernel mode. */
+    int numInstsCurrentMode = 0; /**< Number of instructions in the current mode. */
+
     /** Overall commit status. */
     CommitStatus _status;
     /** Next commit status, to be set at the end of the cycle. */

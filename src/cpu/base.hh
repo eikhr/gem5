@@ -819,6 +819,10 @@ class BaseCPU : public ClockedObject
         statistics::Scalar numInstsKernel;
         statistics::Scalar numInstsUser;
 
+        // Kernel/user mode continous execution periods
+        statistics::SparseHistogram kernelPeriodsLog;
+        statistics::SparseHistogram userPeriodsLog;
+
         /* Number of instructions committed that are not NOP or prefetches */
         statistics::Scalar numInstsNotNOP;
         statistics::Scalar numOpsNotNOP;
