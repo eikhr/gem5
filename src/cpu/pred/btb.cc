@@ -70,7 +70,9 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
                "Number of BTB mispredictions. "
                "No target found or target wrong."),
       ADD_STAT(evictions, statistics::units::Count::get(),
-               "Number of BTB evictions")
+               "Number of BTB evictions"),
+      ADD_STAT(newUniqueEntries, statistics::units::Count::get(),
+               "Number of new unique entries")
 {
     using namespace statistics;
     lookups
@@ -98,6 +100,7 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
         .flags(total | pdf);
 
     evictions.flags(nozero);
+    newUniqueEntries.flags(nozero);
 
     for (int i = 0; i < enums::Num_BranchType; i++) {
         lookups.subname(i, enums::BranchTypeStrings[i]);

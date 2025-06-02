@@ -81,6 +81,9 @@ class SimpleBTB : public BranchTargetBuffer
     
     /** Stack distance probe for BTB accesses */
     StackDistProbe *stackDistProbe;
+
+    /** Set for keeping track of what insts are seen in BTB */
+    std::set<Addr> uniqueEntries;
 };
 
 } // namespace gem5::branch_prediction

@@ -53,7 +53,8 @@ SimpleBTB::SimpleBTB(const SimpleBTBParams &p)
       btb("simpleBTB", p.numEntries, p.associativity,
           p.btbReplPolicy, p.btbIndexingPolicy,
           BTBEntry(genTagExtractor(p.btbIndexingPolicy))),
-      stackDistProbe(p.stackDistProbe)
+      stackDistProbe(p.stackDistProbe),
+      uniqueEntries()
 {
     DPRINTF(BTB, "BTB: Creating BTB object.\n");
 
@@ -142,6 +143,10 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
 
     btb.insertEntry({instPC, tid}, victim);
     victim->update(target, inst);
+
+    auto inserted = uniqueEntries.insert(instPC);
+    if (inserted.second)
+      stats.newUniqueEntries++;
 
     if (stackDistProbe) {
         // Create a dummy packet for the probe
