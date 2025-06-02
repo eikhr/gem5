@@ -95,6 +95,7 @@ class BranchTargetBuffer : public ClockedObject
      */
     virtual void update(ThreadID tid, Addr inst_pc,
                           const PCStateBase &target_pc,
+                          bool isKernelMode,
                           BranchType type = BranchType::NoBranch,
                           StaticInstPtr inst = nullptr) = 0;
 
@@ -121,6 +122,7 @@ class BranchTargetBuffer : public ClockedObject
         statistics::Vector updates;
         statistics::Vector mispredict;
         statistics::Scalar evictions;
+        statistics::Scalar evictionsKernel;
         statistics::Scalar newUniqueEntries;
 
     } stats;

@@ -245,7 +245,7 @@ class BPredUnit : public SimObject
     BTBUpdate(ThreadID tid, Addr instPC, const PCStateBase &target)
     {
         ++stats.BTBUpdates;
-        return get_btb(tid)->update(tid, instPC, target);
+        return get_btb(tid)->update(tid, instPC, target, isKernelMode(tid));
     }
 
 

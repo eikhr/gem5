@@ -71,6 +71,8 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
                "No target found or target wrong."),
       ADD_STAT(evictions, statistics::units::Count::get(),
                "Number of BTB evictions"),
+      ADD_STAT(evictionsKernel, statistics::units::Count::get(),
+               "Number of BTB evictions (kernel mode)"),
       ADD_STAT(newUniqueEntries, statistics::units::Count::get(),
                "Number of new unique entries")
 {
@@ -100,6 +102,7 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
         .flags(total | pdf);
 
     evictions.flags(nozero);
+    evictionsKernel.flags(nozero);
     newUniqueEntries.flags(nozero);
 
     for (int i = 0; i < enums::Num_BranchType; i++) {

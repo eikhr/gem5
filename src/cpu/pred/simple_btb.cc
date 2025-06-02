@@ -130,6 +130,7 @@ SimpleBTB::getInst(ThreadID tid, Addr instPC)
 void
 SimpleBTB::update(ThreadID tid, Addr instPC,
                   const PCStateBase &target,
+                  bool isKernelMode,
                   BranchType type, StaticInstPtr inst)
 {
     stats.updates[type]++;
@@ -138,6 +139,9 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
     BTBEntry *victim = btb.findVictim({instPC, tid}, &wasValid);
     if (wasValid) {
         stats.evictions++;
+        if (isKernelMode) {
+            stats.evictionsKernel++;
+        }
         DPRINTF(BTB, "Evicting entry: %s\n", victim->print());
     }
 

@@ -598,6 +598,7 @@ BPredUnit::squash(const InstSeqNum &squashed_sn,
             stats.BTBUpdates++;
             btb->update(tid, hist->pc,
                             *hist->target,
+                            isKernelMode(tid),
                             hist->type,
                             hist->inst);
             btb->incorrectTarget(hist->pc, hist->type);

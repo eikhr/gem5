@@ -64,6 +64,7 @@ class SimpleBTB : public BranchTargetBuffer
     const PCStateBase *lookup(ThreadID tid, Addr instPC, bool kernelMode,
                               BranchType type = BranchType::NoBranch) override;
     void update(ThreadID tid, Addr instPC, const PCStateBase &target_pc,
+                bool isKernelMode,
                 BranchType type = BranchType::NoBranch,
                 StaticInstPtr inst = nullptr) override;
     const StaticInstPtr getInst(ThreadID tid, Addr instPC) override;
