@@ -152,7 +152,7 @@ class BTBEntry : public ReplaceableEntry
 
     /** Default constructor */
     BTBEntry(TagExtractor ext)
-        : inst(nullptr), extractTag(ext), valid(false), tag({MaxAddr, -1})
+        : inst(nullptr), extractTag(ext), valid(false), tag({MaxAddr, -1}), isKernelMode(false)
     {}
 
     /** Update the target and instruction in the BTB entry.
@@ -160,10 +160,12 @@ class BTBEntry : public ReplaceableEntry
      */
     void
     update(const PCStateBase &_target,
-           StaticInstPtr _inst)
+           StaticInstPtr _inst,
+           bool _isKernelMode)
     {
         set(target, _target);
         inst = _inst;
+        isKernelMode = _isKernelMode;
     }
 
     /**
@@ -194,6 +196,7 @@ class BTBEntry : public ReplaceableEntry
         tag        = other.tag;
         inst       = other.inst;
         extractTag = other.extractTag;
+        isKernelMode = other.isKernelMode;
         set(target, other.target);
     }
 
@@ -204,6 +207,7 @@ class BTBEntry : public ReplaceableEntry
         tag        = other.tag;
         inst       = other.inst;
         extractTag = other.extractTag;
+        isKernelMode = other.isKernelMode;
         set(target, other.target);
 
         return *this;
@@ -232,6 +236,9 @@ class BTBEntry : public ReplaceableEntry
 
     /** Pointer to the static branch inst at this address */
     StaticInstPtr inst;
+
+    /** Whether the entry was updated in kernel mode. */
+    bool isKernelMode;
 
     std::string
     print() const override

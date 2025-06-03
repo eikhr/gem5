@@ -44,6 +44,7 @@
 #include "base/trace.hh"
 #include "debug/BTB.hh"
 #include "mem/probes/stack_dist.hh"
+#include "debug/BTBModeClear.hh"
 
 namespace gem5::branch_prediction
 {
@@ -89,6 +90,11 @@ SimpleBTB::valid(ThreadID tid, Addr instPC)
 const PCStateBase *
 SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
 {
+    if (::gem5::debug::BTBModeClear && isKernelMode != prevKernelMode) {
+        invalidateMode(prevKernelMode);
+        prevKernelMode = isKernelMode;
+    }
+
     stats.lookups[type]++;
     if (isKernelMode) {
         stats.lookupsKernel[type]++;
@@ -133,6 +139,11 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
                   bool isKernelMode,
                   BranchType type, StaticInstPtr inst)
 {
+    if (::gem5::debug::BTBModeClear && isKernelMode != prevKernelMode) {
+      invalidateMode(prevKernelMode);
+      prevKernelMode = isKernelMode;
+    }
+
     stats.updates[type]++;
 
     bool wasValid;
@@ -146,7 +157,7 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
     }
 
     btb.insertEntry({instPC, tid}, victim);
-    victim->update(target, inst);
+    victim->update(target, inst, isKernelMode);
 
     auto inserted = uniqueEntries.insert(instPC);
     if (inserted.second)

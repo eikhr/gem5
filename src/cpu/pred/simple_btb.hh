@@ -77,6 +77,16 @@ class SimpleBTB : public BranchTargetBuffer
     */
     BTBEntry *findEntry(Addr instPC, ThreadID tid);
 
+    /** Invalidate all entries created in user/kernel mode */
+    void invalidateMode(bool kernelMode)
+    {
+        for (auto &entry : btb) {
+            if (entry.isValid() && entry.isKernelMode == kernelMode) {
+                entry.invalidate();
+            }
+        }
+    }
+
     /** The actual BTB. */
     AssociativeCache<BTBEntry> btb;
     
@@ -85,6 +95,8 @@ class SimpleBTB : public BranchTargetBuffer
 
     /** Set for keeping track of what insts are seen in BTB */
     std::set<Addr> uniqueEntries;
+
+    bool prevKernelMode = false;
 };
 
 } // namespace gem5::branch_prediction
