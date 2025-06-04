@@ -44,7 +44,10 @@
 #include "base/trace.hh"
 #include "debug/BTB.hh"
 #include "mem/probes/stack_dist.hh"
+#include "mem/cache/replacement_policies/lru_rp.hh"
 #include "debug/BTBModeClear.hh"
+#include "debug/BTBModeClearReverse.hh"
+#include "debug/BTBModePriority.hh"
 
 namespace gem5::branch_prediction
 {
@@ -90,7 +93,11 @@ SimpleBTB::valid(ThreadID tid, Addr instPC)
 const PCStateBase *
 SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
 {
-    if (::gem5::debug::BTBModeClear && isKernelMode != prevKernelMode) {
+    if (::gem5::debug::BTBModeClear && !isKernelMode && prevKernelMode) {
+        invalidateMode(prevKernelMode);
+        prevKernelMode = isKernelMode;
+    }
+    if (::gem5::debug::BTBModeClearReverse && isKernelMode && !prevKernelMode) {
         invalidateMode(prevKernelMode);
         prevKernelMode = isKernelMode;
     }
@@ -139,15 +146,41 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
                   bool isKernelMode,
                   BranchType type, StaticInstPtr inst)
 {
-    if (::gem5::debug::BTBModeClear && isKernelMode != prevKernelMode) {
-      invalidateMode(prevKernelMode);
-      prevKernelMode = isKernelMode;
+    if (::gem5::debug::BTBModeClear && !isKernelMode && prevKernelMode) {
+        invalidateMode(prevKernelMode);
+        prevKernelMode = isKernelMode;
+    }
+    if (::gem5::debug::BTBModeClearReverse && isKernelMode && !prevKernelMode) {
+        invalidateMode(prevKernelMode);
+        prevKernelMode = isKernelMode;
     }
 
     stats.updates[type]++;
 
-    bool wasValid;
-    BTBEntry *victim = btb.findVictim({instPC, tid}, &wasValid);
+    BTBEntry *victim = nullptr;
+    bool wasValid = false;
+
+    if (::gem5::debug::BTBModePriority) {
+        for (auto &entry : btb) {
+            if (entry.isKernelMode != isKernelMode) {
+                if (
+                  !victim ||
+                  std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(entry.replacementData)->lastTouchTick <
+                      std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(victim->replacementData)->lastTouchTick)
+                {
+                    victim = &entry;
+                }
+                break;
+            }
+        }
+        if (victim) {
+            btb.invalidate(victim);
+        }
+    }
+
+    if (!victim) {
+        victim = btb.findVictim({instPC, tid}, &wasValid);
+    }
     if (wasValid) {
         stats.evictions++;
         if (isKernelMode) {
