@@ -82,7 +82,7 @@ class SimpleBTB : public BranchTargetBuffer
     {
         for (auto &entry : btb) {
             if (entry.isValid() && entry.isKernelMode == kernelMode) {
-                entry.invalidate();
+                btb.invalidate(&entry);
             }
         }
     }
