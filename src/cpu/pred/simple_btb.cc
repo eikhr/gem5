@@ -48,8 +48,8 @@
 #include "debug/BTBModeClear.hh"
 #include "debug/BTBModeClearReverse.hh"
 #include "debug/BTBModePriority.hh"
-#include "debug/BTBModePriorityU.hh"
-#include "debug/BTBModePriorityK.hh"
+#include "debug/BMPU.hh"
+#include "debug/BMPK.hh"
 
 namespace gem5::branch_prediction
 {
@@ -162,7 +162,7 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
     BTBEntry *victim = nullptr;
     bool wasValid = false;
 
-    if (::gem5::debug::BTBModePriority || (::gem5::debug::BTBModePriorityU && !isKernelMode ) || (::gem5::debug::BTBModePriorityK && isKernelMode)) {
+    if (::gem5::debug::BTBModePriority || (::gem5::debug::BMPU && !isKernelMode ) || (::gem5::debug::BMPK && isKernelMode)) {
         for (auto &entry : btb) {
             if (entry.isKernelMode != isKernelMode) {
                 if (
