@@ -127,6 +127,11 @@ SimpleBTB::lookup(ThreadID tid, Addr instPC, bool isKernelMode, BranchType type)
     }
 
     stats.misses[type]++;
+    if (isKernelMode) {
+        stats.missesKernel[type]++;
+    } else {
+        stats.missesUser[type]++;
+    }
     return nullptr;
 }
 

@@ -64,6 +64,10 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
                "Number of BTB lookups in user mode"),
       ADD_STAT(misses, statistics::units::Count::get(),
                "Number of BTB misses"),
+      ADD_STAT(missesKernel, statistics::units::Count::get(),
+               "Number of BTB misses in kernel mode"),
+      ADD_STAT(missesUser, statistics::units::Count::get(),
+               "Number of BTB misses in user mode"),
       ADD_STAT(updates, statistics::units::Count::get(),
                "Number of BTB updates"),
       ADD_STAT(mispredict, statistics::units::Count::get(),
@@ -90,6 +94,14 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
         .flags(total | pdf);
 
     misses
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
+    missesKernel
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
+    missesUser
         .init(enums::Num_BranchType)
         .flags(total | pdf);
 
