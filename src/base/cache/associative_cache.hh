@@ -75,8 +75,12 @@ class AssociativeCache : public Named
     /** The replacement policy of the cache. */
     BaseReplacementPolicy *replPolicy;
 
+  public:
+
     /** Indexing policy of the cache */
     IndexingPolicy *indexingPolicy;
+
+  protected:
 
     /** The entries */
     std::vector<Entry> entries;

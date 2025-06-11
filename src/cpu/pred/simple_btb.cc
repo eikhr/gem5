@@ -168,14 +168,16 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
     bool wasValid = false;
 
     if (::gem5::debug::BTBModePriority || (::gem5::debug::BMPU && !isKernelMode ) || (::gem5::debug::BMPK && isKernelMode)) {
-        for (auto &entry : btb) {
-            if (entry.isKernelMode != isKernelMode) {
+        auto candidates = btb.indexingPolicy->getPossibleEntries({instPC, tid});
+
+        for (const auto &entry : candidates) {
+            if (static_cast<BTBEntry*>(entry)->isKernelMode != isKernelMode) {
                 if (
                   !victim ||
-                  std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(entry.replacementData)->lastTouchTick <
+                  std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(entry->replacementData)->lastTouchTick <
                       std::static_pointer_cast<replacement_policy::LRU::LRUReplData>(victim->replacementData)->lastTouchTick)
                 {
-                    victim = &entry;
+                    victim = static_cast<BTBEntry*>(entry);
                 }
                 break;
             }
