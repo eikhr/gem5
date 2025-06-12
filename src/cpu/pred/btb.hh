@@ -122,6 +122,8 @@ class BranchTargetBuffer : public ClockedObject
         statistics::Vector missesKernel;
         statistics::Vector missesUser;
         statistics::Vector updates;
+        statistics::Vector updatesKernel;
+        statistics::Vector updatesUser;
         statistics::Vector mispredict;
         statistics::Scalar evictions;
         statistics::Scalar evictionsKernel;

@@ -70,6 +70,10 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
                "Number of BTB misses in user mode"),
       ADD_STAT(updates, statistics::units::Count::get(),
                "Number of BTB updates"),
+      ADD_STAT(updatesKernel, statistics::units::Count::get(),
+               "Number of BTB updates in kernel mode"),
+      ADD_STAT(updatesUser, statistics::units::Count::get(),
+               "Number of BTB updates in user mode"),
       ADD_STAT(mispredict, statistics::units::Count::get(),
                "Number of BTB mispredictions. "
                "No target found or target wrong."),
@@ -109,6 +113,14 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
         .init(enums::Num_BranchType)
         .flags(total | pdf);
 
+    updatesKernel
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
+    updatesUser
+        .init(enums::Num_BranchType)
+        .flags(total | pdf);
+
     mispredict
         .init(enums::Num_BranchType)
         .flags(total | pdf);
@@ -121,6 +133,8 @@ BranchTargetBuffer::BranchTargetBufferStats::BranchTargetBufferStats(
         lookups.subname(i, enums::BranchTypeStrings[i]);
         misses.subname(i, enums::BranchTypeStrings[i]);
         updates.subname(i, enums::BranchTypeStrings[i]);
+        updatesUser.subname(i, enums::BranchTypeStrings[i]);
+        updatesKernel.subname(i, enums::BranchTypeStrings[i]);
         mispredict.subname(i, enums::BranchTypeStrings[i]);
     }
 }

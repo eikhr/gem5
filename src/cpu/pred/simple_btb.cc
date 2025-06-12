@@ -164,6 +164,12 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
 
     stats.updates[type]++;
 
+    if (isKernelMode) {
+        stats.updatesKernel[type]++;
+    } else {
+        stats.updatesUser[type]++;
+    }
+
     BTBEntry *victim = nullptr;
     bool wasValid = false;
 
