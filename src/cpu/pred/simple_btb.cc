@@ -189,6 +189,7 @@ SimpleBTB::update(ThreadID tid, Addr instPC,
             }
         }
         if (victim) {
+            wasValid = victim->isValid();
             btb.invalidate(victim);
         }
     }
